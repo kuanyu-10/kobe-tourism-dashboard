@@ -60,20 +60,33 @@
         <canvas id="spotChart"></canvas>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-        fetch("/api/monthly-visitors")
+<script>
+
+    let monthlyChart;
+
+    function loadMonthlyChart(area = "all") {
+
+        fetch(`/api/monthly-visitors?area=${area}`)
             .then(response => response.json())
             .then(data => {
+
                 const labels = data.map(item => item.month);
                 const visitors = data.map(item => item.visitors);
+
                 const ctx = document.getElementById("monthlyChart");
 
-                new Chart(ctx, {
+                if (monthlyChart) {
+                    monthlyChart.destroy();
+                }
+
+                monthlyChart = new Chart(ctx, {
                     type: "line",
+
                     data: {
                         labels: labels,
+
                         datasets: [{
                             label: "観光客数",
                             data: visitors,
@@ -81,61 +94,86 @@
                         }]
                     }
                 });
+
             });
+    }
 
-        fetch("/api/area-visitors")
-            .then(response => response.json())
-            .then(data => {
-                const labels = data.map(item => item.area);
-                const visitors = data.map(item => item.visitors);
-                const ctx = document.getElementById("areaChart");
+    loadMonthlyChart();
 
-                new Chart(ctx, {
-                    type: "bar",
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: "観光客数",
-                            data: visitors
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
+    document.getElementById("areaSelect")
+        .addEventListener("change", function () {
+
+            loadMonthlyChart(this.value);
+
+        });
+
+    fetch("/api/area-visitors")
+        .then(response => response.json())
+        .then(data => {
+
+            const labels = data.map(item => item.area);
+            const visitors = data.map(item => item.visitors);
+
+            const ctx = document.getElementById("areaChart");
+
+            new Chart(ctx, {
+                type: "bar",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [{
+                        label: "観光客数",
+                        data: visitors
+                    }]
+                },
+
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     }
-                });
+                }
             });
-            
-        fetch("/api/spot-visitors")
-            .then(response => response.json())
-            .then(data => {
-                const labels = data.map(item => item.spot);
-                const visitors = data.map(item => item.visitors);
-                const ctx = document.getElementById("spotChart");
 
-                new Chart(ctx, {
-                    type: "bar",
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: "観光客数",
-                            data: visitors
-                        }]
-                    },
-                    options: {
-                        indexAxis: "y",
-                        scales: {
-                            x: {
-                                beginAtZero: true
-                            }
+        });
+
+    fetch("/api/spot-visitors")
+        .then(response => response.json())
+        .then(data => {
+
+            const labels = data.map(item => item.spot);
+            const visitors = data.map(item => item.visitors);
+
+            const ctx = document.getElementById("spotChart");
+
+            new Chart(ctx, {
+                type: "bar",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [{
+                        label: "観光客数",
+                        data: visitors
+                    }]
+                },
+
+                options: {
+                    indexAxis: "y",
+
+                    scales: {
+                        x: {
+                            beginAtZero: true
                         }
                     }
-                });
+                }
             });
-    </script>
+
+        });
+
+</script>
 
 </body>
 

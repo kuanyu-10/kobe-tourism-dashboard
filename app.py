@@ -1,5 +1,5 @@
 import pandas as pd
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
 df = pd.read_csv("tourism_data.csv")
 
@@ -62,11 +62,45 @@ def home():
 
 @app.route("/api/kpi")
 def api_kpi():
-    return jsonify(kpi_data)
+
+    area = request.args.get("area", "all")
+
+    filtered_df = df
+
+    if area != "all":
+        filtered_df = df[df["area"] == area]
+
+    total_visitors = filtered_df["visitors"].sum()
+
+    top_spot = (
+        filtered_df.groupby("spot")["visitors"]
+        .sum()
+        .idxmax()
+    )
+
+    return jsonify({
+        "total_visitors": f"{int(total_visitors):,}人",
+        "top_spot": top_spot
+    })
 
 @app.route("/api/monthly-visitors")
 def api_monthly_visitors():
-    return jsonify(monthly_visitors.to_dict(orient="records"))
+    area = request.args.get("area", "all")
+
+    filtered_df = df
+
+    if area != "all":
+        filtered_df = df[df["area"] == area]
+
+    monthly_data = (
+        filtered_df.groupby("month")["visitors"]
+        .sum()
+        .reset_index()
+    )
+
+    return jsonify(
+        monthly_data.to_dict(orient="records")
+    )
 
 @app.route("/api/area-visitors")
 def api_area_visitors():
