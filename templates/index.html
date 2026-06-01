@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>神戸観光ダッシュボード</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <h1>神戸観光ダッシュボード</h1>
+
+    <div class="kpi-container">
+        <div class="kpi-card">
+            <h2>総観光客数</h2>
+            <p>{{ kpi_data.total_visitors }}</p>
+        </div>
+
+        
+        <div class="kpi-card">
+            <h2>前月比</h2>
+            <p>{{ kpi_data.growth_rate }}</p>
+        </div>
+
+        <div class="kpi-card">
+            <h2>人気エリア</h2>
+            <p>{{ kpi_data.top_area }}</p>
+        </div>
+
+        <div class="kpi-card">
+            <h2>人気スポット</h2>
+            <p>{{ kpi_data.top_spot }}</p>
+        </div>
+    </div>
+
+    <div class="filter-area">
+        <label for="areaSelect">地域選択</label>
+
+        <select id="areaSelect">
+            <option value="all">すべて</option>
+            <option value="三宮">三宮</option>
+            <option value="元町">元町</option>
+            <option value="ハーバーランド">ハーバーランド</option>
+        </select>
+    </div>
+
+    <div class="chart-card">
+        <h2>月別観光客数推移</h2>
+        <canvas id="monthlyChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h2>地域別観光客数</h2>
+        <canvas id="areaChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h2>人気スポットランキング</h2>
+        <canvas id="spotChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        fetch("/api/monthly-visitors")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.month);
+                const visitors = data.map(item => item.visitors);
+                const ctx = document.getElementById("monthlyChart");
+
+                new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "観光客数",
+                            data: visitors,
+                            tension: 0.3
+                        }]
+                    }
+                });
+            });
+
+        fetch("/api/area-visitors")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.area);
+                const visitors = data.map(item => item.visitors);
+                const ctx = document.getElementById("areaChart");
+
+                new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "観光客数",
+                            data: visitors
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+            
+        fetch("/api/spot-visitors")
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.spot);
+                const visitors = data.map(item => item.visitors);
+                const ctx = document.getElementById("spotChart");
+
+                new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "観光客数",
+                            data: visitors
+                        }]
+                    },
+                    options: {
+                        indexAxis: "y",
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+
+</body>
+
+</html>
