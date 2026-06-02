@@ -20,7 +20,7 @@
         
         <div class="kpi-card">
             <h2>前月比</h2>
-            <p>{{ kpi_data.growth_rate }}</p>
+            <p id="growthRate">{{ kpi_data.growth_rate }}</p>
         </div>
 
         <div class="kpi-card">
@@ -74,6 +74,9 @@ let monthlyChart;
 
                 document.getElementById("totalVisitors")
                     .textContent = data.total_visitors;
+
+                 document.getElementById("growthRate")
+                    .textContent = data.growth_rate;
 
                 document.getElementById("topSpot")
                     .textContent = data.top_spot;

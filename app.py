@@ -71,6 +71,21 @@ def api_kpi():
         filtered_df = df[df["area"] == area]
 
     total_visitors = filtered_df["visitors"].sum()
+    monthly_data = (
+        filtered_df.groupby("month")["visitors"]
+        .sum()
+        .reset_index()
+    )
+
+    last_month = monthly_data.iloc[-2]["visitors"]
+
+    current_month = monthly_data.iloc[-1]["visitors"]
+
+    growth_rate = (
+        (current_month - last_month)
+        / last_month
+        * 100
+    )
 
     top_spot = (
         filtered_df.groupby("spot")["visitors"]
@@ -80,6 +95,7 @@ def api_kpi():
 
     return jsonify({
         "total_visitors": f"{int(total_visitors):,}人",
+        "growth_rate": f"{growth_rate:+.1f}%",
         "top_spot": top_spot
     })
 
