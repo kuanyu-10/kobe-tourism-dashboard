@@ -126,5 +126,11 @@ def api_area_visitors():
 def api_spot_visitors():
     return jsonify(spot_visitors.to_dict(orient="records"))
 
+@app.route("/api/spot-table")
+def api_spot_table():
+    return jsonify(
+        spot_visitors.to_dict(orient="records")
+    )
+
 if __name__ == "__main__":
     app.run(debug=True)

@@ -50,14 +50,33 @@
         <canvas id="monthlyChart"></canvas>
     </div>
 
-    <div class="chart-card">
-        <h2>地域別観光客数</h2>
-        <canvas id="areaChart"></canvas>
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h2>地域別観光客数</h2>
+            <canvas id="areaChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h2>人気スポットランキング</h2>
+            <canvas id="spotChart"></canvas>
+        </div>
     </div>
 
-    <div class="chart-card">
-        <h2>人気スポットランキング</h2>
-        <canvas id="spotChart"></canvas>
+    <div class="table-card">
+    <h2>人気スポット一覧</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>順位</th>
+                <th>スポット</th>
+                <th>観光客数</th>
+            </tr>
+        </thead>
+
+        <tbody id="spotTableBody">
+        </tbody>
+    </table>
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -188,6 +207,29 @@ let monthlyChart;
                         }
                     }
                 }
+            });
+
+        });
+
+    fetch("/api/spot-table")
+        .then(response => response.json())
+        .then(data => {
+
+            const tableBody =
+                document.getElementById("spotTableBody");
+
+            data.forEach((item, index) => {
+
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.spot}</td>
+                        <td>${item.visitors.toLocaleString()}</td>
+                    </tr>
+                `;
+
+                tableBody.innerHTML += row;
+
             });
 
         });
