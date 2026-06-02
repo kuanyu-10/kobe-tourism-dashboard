@@ -14,7 +14,7 @@
     <div class="kpi-container">
         <div class="kpi-card">
             <h2>総観光客数</h2>
-            <p>{{ kpi_data.total_visitors }}</p>
+            <p id="totalVisitors">{{ kpi_data.total_visitors }}</p>
         </div>
 
         
@@ -30,7 +30,7 @@
 
         <div class="kpi-card">
             <h2>人気スポット</h2>
-            <p>{{ kpi_data.top_spot }}</p>
+            <p id="topSpot">{{ kpi_data.top_spot }}</p>
         </div>
     </div>
 
@@ -64,7 +64,22 @@
 
 <script>
 
-    let monthlyChart;
+let monthlyChart;
+
+    function loadKPI(area = "all") {
+
+        fetch(`/api/kpi?area=${area}`)
+            .then(response => response.json())
+            .then(data => {
+
+                document.getElementById("totalVisitors")
+                    .textContent = data.total_visitors;
+
+                document.getElementById("topSpot")
+                    .textContent = data.top_spot;
+
+            });
+    }
 
     function loadMonthlyChart(area = "all") {
 
@@ -104,6 +119,7 @@
         .addEventListener("change", function () {
 
             loadMonthlyChart(this.value);
+            loadKPI(this.value);
 
         });
 
