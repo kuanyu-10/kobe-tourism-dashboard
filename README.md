@@ -2,25 +2,25 @@
 
 ### Dashboard Overview
 
-![alt text](dashboard-overview.png)
+![Dashboard Overview](screenshots/dashboard-overview.png)
 
 ---
 
 ### Area Filter
 
-![alt text](area-filter.png)
+![Area Filter](screenshots/area-filter.png)
 
 ---
 
 ### 人気スポット TOP10
 
-![alt text](top10-ranking.png)
+![Top10 Ranking](screenshots/top10-ranking.png)
 
 ---
 
 ### 人気観光スポットランキング
 
-![alt text](ranking-table.png)
+![Ranking Table](screenshots/ranking-table.png)
 
 
 # 神戸観光ダッシュボード
