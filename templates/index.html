@@ -10,26 +10,29 @@
 <body>
 
     <h1>神戸観光ダッシュボード</h1>
+    <p class="subtitle">
+    神戸市観光スポットデータ分析ダッシュボード
+    </p>
 
     <div class="kpi-container">
         <div class="kpi-card">
-            <h2>総観光客数</h2>
-            <p id="totalVisitors">{{ kpi_data.total_visitors }}</p>
+            <h2>総スポット数</h2>
+            <p id="totalSpots">{{ kpi_data.total_spots }}</p>
         </div>
 
         
         <div class="kpi-card">
-            <h2>前月比</h2>
-            <p id="growthRate">{{ kpi_data.growth_rate }}</p>
+            <h2>平均評価</h2>
+            <p id="avgRating">{{ kpi_data.avg_rating }}</p>
         </div>
 
         <div class="kpi-card">
-            <h2>人気エリア</h2>
-            <p>{{ kpi_data.top_area }}</p>
+            <h2>高評価スポット数</h2>
+            <p id="recommendedSpots">{{ kpi_data.recommended_spots }}</p>    
         </div>
 
         <div class="kpi-card">
-            <h2>人気スポット</h2>
+            <h2>人気No.1スポット</h2>
             <p id="topSpot">{{ kpi_data.top_spot }}</p>
         </div>
     </div>
@@ -39,38 +42,47 @@
 
         <select id="areaSelect">
             <option value="all">すべて</option>
-            <option value="三宮">三宮</option>
-            <option value="元町">元町</option>
-            <option value="ハーバーランド">ハーバーランド</option>
+            <option value="中央区">中央区</option>
+            <option value="灘区">灘区</option>
+            <option value="東灘区">東灘区</option>
+            <option value="北区">北区</option>
+            <option value="須磨区">須磨区</option>
+            <option value="兵庫区">兵庫区</option>
+            <option value="長田区">長田区</option>
+            <option value="垂水区">垂水区</option>
         </select>
     </div>
 
     <div class="chart-card">
-        <h2>月別観光客数推移</h2>
-        <canvas id="monthlyChart"></canvas>
+        <h2>カテゴリ別スポット数</h2>
+        <canvas id="categoryChart"></canvas>
     </div>
 
     <div class="chart-grid">
         <div class="chart-card">
-            <h2>地域別観光客数</h2>
+            <h2>エリア別スポット数</h2>
             <canvas id="areaChart"></canvas>
         </div>
 
         <div class="chart-card">
-            <h2>人気スポットランキング</h2>
+            <h2>人気スポット TOP10</h2>
             <canvas id="spotChart"></canvas>
         </div>
     </div>
 
     <div class="table-card">
-    <h2>人気スポット一覧</h2>
+    <h2>人気観光スポットランキング</h2>
 
     <table>
         <thead>
             <tr>
                 <th>順位</th>
                 <th>スポット</th>
-                <th>観光客数</th>
+                <th>エリア</th>
+                <th>カテゴリ</th>
+                <th>評価</th>
+                <th>レビュー数</th>
+                <th>人気指数</th>
             </tr>
         </thead>
 
@@ -83,122 +95,103 @@
 
 <script>
 
-let monthlyChart;
+let categoryChart;
+let spotChart;
 
-    function loadKPI(area = "all") {
+function loadKPI(area = "all") {
 
-        fetch(`/api/kpi?area=${area}`)
-            .then(response => response.json())
-            .then(data => {
-
-                document.getElementById("totalVisitors")
-                    .textContent = data.total_visitors;
-
-                 document.getElementById("growthRate")
-                    .textContent = data.growth_rate;
-
-                document.getElementById("topSpot")
-                    .textContent = data.top_spot;
-
-            });
-    }
-
-    function loadMonthlyChart(area = "all") {
-
-        fetch(`/api/monthly-visitors?area=${area}`)
-            .then(response => response.json())
-            .then(data => {
-
-                const labels = data.map(item => item.month);
-                const visitors = data.map(item => item.visitors);
-
-                const ctx = document.getElementById("monthlyChart");
-
-                if (monthlyChart) {
-                    monthlyChart.destroy();
-                }
-
-                monthlyChart = new Chart(ctx, {
-                    type: "line",
-
-                    data: {
-                        labels: labels,
-
-                        datasets: [{
-                            label: "観光客数",
-                            data: visitors,
-                            tension: 0.3
-                        }]
-                    }
-                });
-
-            });
-    }
-
-    loadMonthlyChart();
-
-    document.getElementById("areaSelect")
-        .addEventListener("change", function () {
-
-            loadMonthlyChart(this.value);
-            loadKPI(this.value);
-
-        });
-
-    fetch("/api/area-visitors")
+    fetch(`/api/kpi?area=${area}`)
         .then(response => response.json())
         .then(data => {
 
-            const labels = data.map(item => item.area);
-            const visitors = data.map(item => item.visitors);
+            document.getElementById("totalSpots")
+                .textContent = data.total_spots;
 
-            const ctx = document.getElementById("areaChart");
+            document.getElementById("avgRating")
+                .textContent = data.avg_rating;
 
-            new Chart(ctx, {
-                type: "bar",
+            document.getElementById("recommendedSpots")
+                .textContent = data.recommended_spots;
+
+            document.getElementById("topSpot")
+                .textContent = data.top_spot;
+
+        });
+}
+
+function loadCategoryChart(area = "all") {
+
+    fetch(`/api/category-spots?area=${area}`)
+        .then(response => response.json())
+        .then(data => {
+
+            const labels =
+                data.map(item => item.category);
+
+            const counts =
+                data.map(item => item.count);
+
+            const ctx =
+                document.getElementById("categoryChart");
+
+            if (categoryChart) {
+                categoryChart.destroy();
+            }
+
+            categoryChart = new Chart(ctx, {
+
+                type: "pie",
 
                 data: {
                     labels: labels,
 
                     datasets: [{
-                        label: "観光客数",
-                        data: visitors
+                        data: counts
                     }]
-                },
-
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
                 }
+
             });
 
         });
+}
 
-    fetch("/api/spot-visitors")
+function loadSpotChart(area = "all") {
+
+    fetch(`/api/spot-visitors?area=${area}`)
         .then(response => response.json())
         .then(data => {
 
-            const labels = data.map(item => item.spot);
-            const visitors = data.map(item => item.visitors);
+            const labels =
+                data.map(item => item.spot_name);
 
-            const ctx = document.getElementById("spotChart");
+            const scores =
+                data.map(item =>
+                    item.popularity_score.toFixed(2)
+                );
 
-            new Chart(ctx, {
+            const ctx =
+                document.getElementById("spotChart");
+
+            if (spotChart) {
+                spotChart.destroy();
+            }
+
+            spotChart = new Chart(ctx, {
+
                 type: "bar",
 
                 data: {
+
                     labels: labels,
 
                     datasets: [{
-                        label: "観光客数",
-                        data: visitors
+                        label: "人気指数",
+                        data: scores
                     }]
                 },
 
                 options: {
+
                     indexAxis: "y",
 
                     scales: {
@@ -210,22 +203,31 @@ let monthlyChart;
             });
 
         });
+}
 
-    fetch("/api/spot-table")
+function loadSpotTable(area = "all") {
+
+    fetch(`/api/spot-table?area=${area}`)
         .then(response => response.json())
         .then(data => {
 
             const tableBody =
                 document.getElementById("spotTableBody");
 
+            tableBody.innerHTML = "";
+
             data.forEach((item, index) => {
 
                 const row = `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.spot}</td>
-                        <td>${item.visitors.toLocaleString()}</td>
-                    </tr>
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.spot_name}</td>
+                    <td>${item.area}</td>
+                    <td>${item.category}</td>
+                    <td>${item.rating}</td>
+                    <td>${item.review_count.toLocaleString()}</td>
+                    <td>${item.popularity_score.toFixed(2)}</td>
+                </tr>
                 `;
 
                 tableBody.innerHTML += row;
@@ -233,6 +235,63 @@ let monthlyChart;
             });
 
         });
+}
+
+document.getElementById("areaSelect")
+    .addEventListener("change", function () {
+
+        const area = this.value;
+
+        loadKPI(area);
+        loadCategoryChart(area);
+        loadSpotChart(area);
+        loadSpotTable(area);
+
+    });
+
+loadKPI();
+loadCategoryChart();
+loadSpotChart();
+loadSpotTable();
+
+fetch("/api/area-visitors")
+    .then(response => response.json())
+    .then(data => {
+
+        const labels =
+            data.map(item => item.area);
+
+        const counts =
+            data.map(item => item.count);
+
+        const ctx =
+            document.getElementById("areaChart");
+
+        new Chart(ctx, {
+
+            type: "bar",
+
+            data: {
+
+                labels: labels,
+
+                datasets: [{
+                    label: "スポット数",
+                    data: counts
+                }]
+            },
+
+            options: {
+
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+    });
 
 </script>
 
